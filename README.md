@@ -1,7 +1,7 @@
 # Trunk
 
-Trunk is a Gleam logger that prints UTC timestamps and uses Moss to style
-severity labels.
+Trunk is a Gleam logger that prints UTC times like `10:32:18PM` and uses Moss to
+style severity labels.
 
 ```gleam
 import trunk

@@ -18,7 +18,8 @@ pub fn minimum_level_includes_the_threshold_and_higher_levels_test() {
 }
 
 pub fn render_log_styles_only_the_level_test() {
-  let time = timestamp.from_unix_seconds(0)
+  let assert Ok(time) =
+    timestamp.parse_rfc3339("2026-11-15T22:32:18.987827583Z")
 
   list.each(
     [
@@ -33,9 +34,25 @@ pub fn render_log_styles_only_the_level_test() {
 
       trunk.Log(time, level, "hello")
       |> trunk.render_log
-      |> should.equal(
-        "1970-01-01T00:00:00Z " <> styled_label <> "\u{001b}[0m hello",
-      )
+      |> should.equal("10:32:18PM " <> styled_label <> "\u{001b}[0m hello")
+    },
+  )
+}
+
+pub fn render_log_uses_12_hour_time_test() {
+  list.each(
+    [
+      #("1970-01-01T00:00:00Z", "12:00:00AM"),
+      #("1970-01-01T01:02:03Z", "01:02:03AM"),
+      #("1970-01-01T12:00:00Z", "12:00:00PM"),
+    ],
+    fn(example) {
+      let #(input, expected) = example
+      let assert Ok(time) = timestamp.parse_rfc3339(input)
+
+      trunk.Log(time, trunk.Info, "hello")
+      |> trunk.render_log
+      |> should.equal(expected <> " \u{001b}[32mINFO\u{001b}[0m hello")
     },
   )
 }
