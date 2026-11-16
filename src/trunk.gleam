@@ -135,10 +135,16 @@ pub fn render_log(log: Log) -> String {
 }
 
 fn render_fields(fields: List(#(String, String))) -> String {
+  let error_style = moss.new() |> moss.foreground(moss.BrightBlack)
+
   fields
   |> list.map(fn(field) {
     let #(key, value) = field
-    " " <> field_token(key) <> "=" <> field_token(value)
+    let prefix = case key {
+      "err" -> moss.render(error_style, "err=")
+      _ -> field_token(key) <> "="
+    }
+    " " <> prefix <> field_token(value)
   })
   |> string.concat
 }

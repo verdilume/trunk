@@ -47,13 +47,15 @@ pub fn render_log_appends_escaped_fields_in_order_test() {
     #("status", "200"),
     #("request path", "/café menu"),
     #("detail", "a=\"b\"\\c\n\t\u{001b}"),
+    #("err", "permission denied"),
     #("empty", ""),
   ])
   |> trunk.render_log
   |> should.equal(
     "10:32:18PM \u{001b}[1;32mINFO\u{001b}[0m Request completed"
     <> " method=GET status=200 \"request path\"=\"/café menu\""
-    <> " detail=\"a=\\\"b\\\"\\\\c\\n\\t\\u{1B}\" empty=\"\"",
+    <> " detail=\"a=\\\"b\\\"\\\\c\\n\\t\\u{1B}\""
+    <> " \u{001b}[90merr=\u{001b}[0m\"permission denied\" empty=\"\"",
   )
 }
 
