@@ -43,8 +43,9 @@ expensive message.
 
 Keep the Moss checkout at `../moss` so Gleam can resolve the local dependency.
 GitHub Actions checks out Moss beside Trunk from `<owner>/moss` by default.
-Set the `MOSS_REPOSITORY` Actions variable to `owner/repo` if Moss is hosted in
-a different public repository.
+For a private Moss repository, add a read-only deploy key to Moss and store its
+private key in the Trunk Actions secret `MOSS_DEPLOY_KEY`. Set the
+`MOSS_REPOSITORY` Actions variable to `owner/repo` if Moss is hosted elsewhere.
 
 ```sh
 gleam run   # Run the project
