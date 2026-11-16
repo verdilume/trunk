@@ -1,12 +1,18 @@
 import gleam/int
 import gleam/io
+import gleam/list
 import gleam/string
 import gleam/time/calendar
 import gleam/time/timestamp
 import moss
 
 pub type Log {
-  Log(time: timestamp.Timestamp, level: Level, message: String)
+  Log(
+    time: timestamp.Timestamp,
+    level: Level,
+    message: String,
+    fields: List(#(String, String)),
+  )
 }
 
 pub type Level {
@@ -35,8 +41,18 @@ pub fn enabled(logger: Logger, level: Level) -> Bool {
 
 /// Print a message with the current local time if its level is enabled.
 pub fn log(logger: Logger, level: Level, message: String) -> Nil {
+  log_with(logger, level, message, [])
+}
+
+/// Print a message with key-value fields if its level is enabled.
+pub fn log_with(
+  logger: Logger,
+  level: Level,
+  message: String,
+  fields: List(#(String, String)),
+) -> Nil {
   case enabled(logger, level) {
-    True -> print_log(Log(timestamp.system_time(), level, message))
+    True -> print_log(Log(timestamp.system_time(), level, message, fields))
     False -> Nil
   }
 }
@@ -54,6 +70,21 @@ pub fn warn(message: String) -> Nil {
 /// Log an error with the default logger.
 pub fn error(message: String) -> Nil {
   log(default_logger, Error, message)
+}
+
+/// Log an informational message with key-value fields.
+pub fn info_with(message: String, fields: List(#(String, String))) -> Nil {
+  log_with(default_logger, Info, message, fields)
+}
+
+/// Log a warning with key-value fields.
+pub fn warn_with(message: String, fields: List(#(String, String))) -> Nil {
+  log_with(default_logger, Warn, message, fields)
+}
+
+/// Log an error with key-value fields.
+pub fn error_with(message: String, fields: List(#(String, String))) -> Nil {
+  log_with(default_logger, Error, message, fields)
 }
 
 fn level_rank(level: Level) -> Int {
@@ -95,7 +126,57 @@ pub fn render_log(log: Log) -> String {
   }
   let level_str = moss.render(level_style, level_to_string(log.level))
 
-  time_str <> " " <> level_str <> " " <> log.message
+  time_str
+  <> " "
+  <> level_str
+  <> " "
+  <> log.message
+  <> render_fields(log.fields)
+}
+
+fn render_fields(fields: List(#(String, String))) -> String {
+  fields
+  |> list.map(fn(field) {
+    let #(key, value) = field
+    " " <> field_token(key) <> "=" <> field_token(value)
+  })
+  |> string.concat
+}
+
+fn field_token(text: String) -> String {
+  let characters = string.to_utf_codepoints(text)
+  let bare =
+    characters != []
+    && list.all(characters, fn(character) {
+      let code = string.utf_codepoint_to_int(character)
+      // Bare tokens use printable ASCII except double quote, equals, and backslash.
+      code > 32 && code < 127 && code != 34 && code != 61 && code != 92
+    })
+
+  case bare {
+    True -> text
+    False ->
+      "\""
+      <> { characters |> list.map(escape_field_character) |> string.concat }
+      <> "\""
+  }
+}
+
+fn escape_field_character(character: UtfCodepoint) -> String {
+  case string.utf_codepoint_to_int(character) {
+    9 -> "\\t"
+    10 -> "\\n"
+    13 -> "\\r"
+    34 -> "\\\""
+    92 -> "\\\\"
+    code
+      if code < 32
+      || { code >= 127 && code <= 159 }
+      || code == 0x2028
+      || code == 0x2029
+    -> "\\u{" <> int.to_base16(code) <> "}"
+    _ -> string.from_utf_codepoints([character])
+  }
 }
 
 fn format_time(time: timestamp.Timestamp) -> String {

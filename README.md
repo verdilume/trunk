@@ -15,6 +15,22 @@ pub fn main() -> Nil {
 
 These helpers use the default `Info` threshold.
 
+### Key-value fields
+
+```gleam
+log.info_with("Request completed", [
+  #("method", "GET"),
+  #("status", "200"),
+])
+```
+
+This prints `10:32:18PM INFO Request completed method=GET status=200`. Fields
+are string pairs and appear in the order provided. Trunk quotes keys and values
+with spaces or separators and escapes line breaks.
+
+Use `log.warn_with` and `log.error_with` for other severities, or use
+`trunk.log_with(logger, level, message, fields)` with a custom logger.
+
 ### Custom thresholds
 
 Create a logger with `trunk.new(minimum_level)` and use

@@ -32,10 +32,28 @@ pub fn render_log_styles_only_the_level_test() {
     fn(example) {
       let #(level, styled_label) = example
 
-      trunk.Log(time, level, "hello")
+      trunk.Log(time, level, "hello", [])
       |> trunk.render_log
       |> should.equal("10:32:18PM " <> styled_label <> "\u{001b}[0m hello")
     },
+  )
+}
+
+pub fn render_log_appends_escaped_fields_in_order_test() {
+  let time = timestamp_for_local_clock("2026-11-15T22:32:18Z")
+
+  trunk.Log(time, trunk.Info, "Request completed", [
+    #("method", "GET"),
+    #("status", "200"),
+    #("request path", "/café menu"),
+    #("detail", "a=\"b\"\\c\n\t\u{001b}"),
+    #("empty", ""),
+  ])
+  |> trunk.render_log
+  |> should.equal(
+    "10:32:18PM \u{001b}[1;32mINFO\u{001b}[0m Request completed"
+    <> " method=GET status=200 \"request path\"=\"/café menu\""
+    <> " detail=\"a=\\\"b\\\"\\\\c\\n\\t\\u{1B}\" empty=\"\"",
   )
 }
 
@@ -50,7 +68,7 @@ pub fn render_log_uses_12_hour_time_test() {
       let #(input, expected) = example
       let time = timestamp_for_local_clock(input)
 
-      trunk.Log(time, trunk.Info, "hello")
+      trunk.Log(time, trunk.Info, "hello", [])
       |> trunk.render_log
       |> should.equal(expected <> " \u{001b}[1;32mINFO\u{001b}[0m hello")
     },
