@@ -21,6 +21,8 @@ pub opaque type Logger {
   Logger(minimum_level: Level)
 }
 
+const default_logger = Logger(Info)
+
 /// Create a logger that prints messages at or above `minimum_level`.
 pub fn new(minimum_level: Level) -> Logger {
   Logger(minimum_level)
@@ -37,6 +39,21 @@ pub fn log(logger: Logger, level: Level, message: String) -> Nil {
     True -> print_log(Log(timestamp.system_time(), level, message))
     False -> Nil
   }
+}
+
+/// Log an informational message with the default logger.
+pub fn info(message: String) -> Nil {
+  log(default_logger, Info, message)
+}
+
+/// Log a warning with the default logger.
+pub fn warn(message: String) -> Nil {
+  log(default_logger, Warn, message)
+}
+
+/// Log an error with the default logger.
+pub fn error(message: String) -> Nil {
+  log(default_logger, Error, message)
 }
 
 fn level_rank(level: Level) -> Int {
@@ -107,7 +124,7 @@ pub fn print_log(log: Log) -> Nil {
 }
 
 pub fn main() -> Nil {
-  let logger = new(Warn)
-  log(logger, Debug, "Opening config file")
-  log(logger, Warn, "Config file missing; using defaults")
+  info("Server started")
+  warn("Using defaults")
+  error("Could not open config")
 }
