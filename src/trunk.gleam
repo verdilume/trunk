@@ -33,7 +33,7 @@ pub fn enabled(logger: Logger, level: Level) -> Bool {
   level_rank(level) >= level_rank(logger.minimum_level)
 }
 
-/// Print a message with the current UTC time if its level is enabled.
+/// Print a message with the current local time if its level is enabled.
 pub fn log(logger: Logger, level: Level, message: String) -> Nil {
   case enabled(logger, level) {
     True -> print_log(Log(timestamp.system_time(), level, message))
@@ -76,7 +76,8 @@ pub fn level_to_string(level: Level) -> String {
   }
 }
 
-/// Render the UTC time in 12-hour format and an ANSI-styled severity label.
+/// Render a 12-hour timestamp and an ANSI-styled severity label.
+/// The timestamp uses the machine's current local offset.
 pub fn render_log(log: Log) -> String {
   let time_str = format_time(log.time)
   let style =
@@ -98,7 +99,7 @@ pub fn render_log(log: Log) -> String {
 }
 
 fn format_time(time: timestamp.Timestamp) -> String {
-  let #(_, time) = timestamp.to_calendar(time, calendar.utc_offset)
+  let #(_, time) = timestamp.to_calendar(time, calendar.local_offset())
   let hour = case time.hours % 12 {
     0 -> 12
     hour -> hour

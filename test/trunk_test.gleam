@@ -1,4 +1,5 @@
 import gleam/list
+import gleam/time/calendar
 import gleam/time/timestamp
 import gleeunit
 import gleeunit/should
@@ -18,15 +19,14 @@ pub fn minimum_level_includes_the_threshold_and_higher_levels_test() {
 }
 
 pub fn render_log_styles_only_the_level_test() {
-  let assert Ok(time) =
-    timestamp.parse_rfc3339("2026-11-15T22:32:18.987827583Z")
+  let time = timestamp_for_local_clock("2026-11-15T22:32:18.987827583Z")
 
   list.each(
     [
-      #(trunk.Debug, "\u{001b}[36mDEBUG"),
-      #(trunk.Info, "\u{001b}[32mINFO"),
-      #(trunk.Warn, "\u{001b}[33mWARN"),
-      #(trunk.Error, "\u{001b}[31mERROR"),
+      #(trunk.Debug, "\u{001b}[1;36mDEBUG"),
+      #(trunk.Info, "\u{001b}[1;32mINFO"),
+      #(trunk.Warn, "\u{001b}[1;33mWARN"),
+      #(trunk.Error, "\u{001b}[1;31mERROR"),
       #(trunk.Fatal, "\u{001b}[1;37;41mFATAL"),
     ],
     fn(example) {
@@ -48,11 +48,16 @@ pub fn render_log_uses_12_hour_time_test() {
     ],
     fn(example) {
       let #(input, expected) = example
-      let assert Ok(time) = timestamp.parse_rfc3339(input)
+      let time = timestamp_for_local_clock(input)
 
       trunk.Log(time, trunk.Info, "hello")
       |> trunk.render_log
-      |> should.equal(expected <> " \u{001b}[32mINFO\u{001b}[0m hello")
+      |> should.equal(expected <> " \u{001b}[1;32mINFO\u{001b}[0m hello")
     },
   )
+}
+
+fn timestamp_for_local_clock(input: String) -> timestamp.Timestamp {
+  let assert Ok(time) = timestamp.parse_rfc3339(input)
+  timestamp.subtract(time, calendar.local_offset())
 }
