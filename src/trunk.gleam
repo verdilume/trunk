@@ -79,7 +79,9 @@ pub fn level_to_string(level: Level) -> String {
 /// Render the UTC time in 12-hour format and an ANSI-styled severity label.
 pub fn render_log(log: Log) -> String {
   let time_str = format_time(log.time)
-  let style = moss.new()
+  let style =
+    moss.new()
+    |> moss.bold
   let level_style = case log.level {
     Debug -> moss.foreground(style, moss.Cyan)
     Info -> moss.foreground(style, moss.Green)
@@ -89,7 +91,6 @@ pub fn render_log(log: Log) -> String {
       style
       |> moss.foreground(moss.White)
       |> moss.background(moss.Red)
-      |> moss.bold
   }
   let level_str = moss.render(level_style, level_to_string(log.level))
 
