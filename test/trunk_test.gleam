@@ -23,11 +23,11 @@ pub fn render_log_styles_only_the_level_test() {
 
   list.each(
     [
-      #(trunk.Debug, "\u{001b}[1;36mDEBUG"),
+      #(trunk.Debug, "\u{001b}[1;36mDEBU"),
       #(trunk.Info, "\u{001b}[1;32mINFO"),
       #(trunk.Warn, "\u{001b}[1;33mWARN"),
-      #(trunk.Error, "\u{001b}[1;31mERROR"),
-      #(trunk.Fatal, "\u{001b}[1;37;41mFATAL"),
+      #(trunk.Error, "\u{001b}[1;31mERRO"),
+      #(trunk.Fatal, "\u{001b}[1;37;41mFATA"),
     ],
     fn(example) {
       let #(level, styled_label) = example

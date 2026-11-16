@@ -68,11 +68,11 @@ fn level_rank(level: Level) -> Int {
 
 pub fn level_to_string(level: Level) -> String {
   case level {
-    Debug -> "DEBUG"
+    Debug -> "DEBU"
     Info -> "INFO"
     Warn -> "WARN"
-    Error -> "ERROR"
-    Fatal -> "FATAL"
+    Error -> "ERRO"
+    Fatal -> "FATA"
   }
 }
 
